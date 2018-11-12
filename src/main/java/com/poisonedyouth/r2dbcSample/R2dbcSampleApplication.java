@@ -27,14 +27,14 @@ public class R2dbcSampleApplication implements CommandLineRunner {
 
 		R2dbc r2dbc = new R2dbc(new H2ConnectionFactory(configuration));
 
-		//Create table
-		r2dbc.inTransaction(handle -> handle.execute("CREATE TABLE IF NOT EXISTS test (sample int)")).subscribe();
-
-		//Insert values
-		r2dbc.inTransaction(handle -> handle.execute("INSERT INTO test VALUES ($1)", 100)).subscribe();
+		//Create table and insert sample data
+		r2dbc.inTransaction(handle -> {
+			handle.execute("CREATE TABLE IF NOT EXISTS sampleTable (sampleColumn int)");
+			return handle.execute("INSERT INTO sampleTable VALUES ($1)", 100);
+		}).subscribe();
 
 		//Read values
-		r2dbc.inTransaction(handle -> handle.select("SELECT sample FROM test").mapRow(r -> r.get("sample", Integer.class)))
+		r2dbc.inTransaction(handle -> handle.select("SELECT * FROM sampleTable").mapRow(r -> r.get("sampleColumn", Integer.class)))
 						.subscribe(s -> System.out.println("RECEIVED: " + s));
 
 	}
